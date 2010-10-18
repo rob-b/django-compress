@@ -1,10 +1,8 @@
 import os
 import re
-import tempfile
 
 from django.conf import settings as django_settings
 from django.utils.http import urlquote
-from django.dispatch import dispatcher
 
 from compress.conf import settings
 from compress.signals import css_filtered, js_filtered
@@ -58,12 +56,16 @@ def media_root(filename):
     """
     Return the full path to ``filename``. ``filename`` is a relative path name in MEDIA_ROOT
     """
-    return os.path.join(django_settings.MEDIA_ROOT, filename)
+    compress_root = getattr(django_settings, 'COMPRESS_ROOT',
+                   django_settings.MEDIA_ROOT)
+    return os.path.join(compress_root, filename)
 
 def media_url(url, prefix=None):
     if prefix:
         return prefix + urlquote(url)
-    return django_settings.MEDIA_URL + urlquote(url)
+    compress_url = getattr(django_settings, 'COMPRESS_URL',
+                           django_settings.MEDIA_URL)
+    return compress_url + urlquote(url)
 
 def concat(filenames, separator=''):
     """
